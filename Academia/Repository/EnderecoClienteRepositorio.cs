@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Data;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 
 namespace Academia.Repository
 {
@@ -49,17 +50,20 @@ namespace Academia.Repository
 
                 var leitura = _repositoryConnection.CommandBusca("BuscaEnderecoPorIdCliente", dados);
 
-                while (leitura.Read())
+                //DataTable dataTable = JsonConvert.DeserializeObject<DataTable>(leitura);
+
+                //while (leitura.Read())
+                foreach (DataRow row in leitura.Rows)
                 {
                     enderecoCliente = new EnderecoCliente();
 
-                    enderecoCliente.IdEnderecoCliente = Convert.ToInt32(leitura["IdEnderecoCliente"]);
-                    enderecoCliente.LogradouroCliente = leitura["LogradouroCliente"].ToString();
-                    enderecoCliente.BairroCliente = leitura["BairroCliente"].ToString();
+                    enderecoCliente.IdEnderecoCliente = Convert.ToInt32(row["IdEnderecoCliente"]);
+                    enderecoCliente.LogradouroCliente = row["LogradouroCliente"].ToString();
+                    enderecoCliente.BairroCliente = row["BairroCliente"].ToString();
                 }
 
-                leitura.Close();
-                leitura.Dispose();
+                //leitura.Close();
+                //leitura.Dispose();
 
                 return enderecoCliente;
             }

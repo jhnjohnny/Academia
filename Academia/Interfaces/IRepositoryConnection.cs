@@ -9,12 +9,12 @@ namespace Academia.Interfaces
 {
     public interface IRepositoryConnection
     {
-        public SqlConnection Conexao();
+        //public SqlConnection Conexao();
 
-        public SqlDataReader CommandBusca(string nomeProcedure, Dictionary<string, string> Parametros);
+        public DataTable CommandBusca(string nomeProcedure, Dictionary<string, string> Parametros);
 
         public int CommandInserir(string nomeProcedure, Dictionary<string, string> Parametros);
 
-        public int CommandExecucaoSimples(string nomeProcedure, Dictionary<string, string> Parametros);
+        public void CommandExecucaoSimples(string nomeProcedure, Dictionary<string, string> Parametros);
     }
 }

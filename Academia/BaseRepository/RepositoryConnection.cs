@@ -1,5 +1,6 @@
 ﻿using Academia.Interfaces;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -18,13 +19,13 @@ namespace Academia.BaseRepository
             _configuration = configuration;
         }
 
-        public SqlConnection Conexao()
+        private SqlConnection Conexao()
         {
             SqlConnection _conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
             return _conn;
         }
 
-        public SqlDataReader CommandBusca(string nomeProcedure, Dictionary<string, string> Parametros)
+        public DataTable CommandBusca(string nomeProcedure, Dictionary<string, string> Parametros)
         {
             try
             {
@@ -41,8 +42,13 @@ namespace Academia.BaseRepository
                 cmd.Connection = Conexao();
                 cmd.Connection.Open();
 
-                var teste = cmd.ExecuteReader();
-                return teste; 
+                SqlDataReader dataReader = cmd.ExecuteReader();
+
+                var dataTable = new DataTable();
+                dataTable.Load(dataReader);
+
+                //return JsonConvert.SerializeObject(dataTable);
+                return dataTable;
 
             }
             catch (Exception ex)
@@ -85,9 +91,9 @@ namespace Academia.BaseRepository
             return IdCliente;
         }
 
-        public int CommandExecucaoSimples(string nomeProcedure, Dictionary<string, string> Parametros)
+        public void CommandExecucaoSimples(string nomeProcedure, Dictionary<string, string> Parametros)
         {
-            int IdCliente = 0;
+            //int IdCliente = 0;
 
             try
             {
@@ -115,7 +121,7 @@ namespace Academia.BaseRepository
                 throw ex;
             }
 
-            return IdCliente;
+            //return IdCliente;
         }
     }
 }

@@ -3,6 +3,8 @@ using Academia.Repository;
 using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
@@ -27,18 +29,27 @@ namespace AcademiaTest
         }
 
         [TestMethod]
-        public void BuscaTodosClientesTeste()
+        public void BuscaTodosClientesTest_OK()
         {
             //Arrange
-            bool readToggle = true;
-            Mock<SqlDataReader> dataReader = new Mock<SqlDataReader>();
-            dataReader.Setup(x => x.Read()).Returns(() => readToggle).Callback(() => readToggle = false);
-            dataReader.Setup(x => x["IdCliente"]).Returns("1");
-            dataReader.Setup(x => x["CpfCliente"]).Returns("07772719906");
-            dataReader.Setup(x => x["NomeCliente"]).Returns("Arthur");
-            dataReader.Setup(x => x["StatusCliente"]).Returns("true");
-            var dic = new Dictionary<string, string>();
-            _repositoryConnection.Setup(x => x.CommandBusca("BuscaTodosClientes", dic)).Returns(dataReader.Object);
+            var jsonDataTable = @"[
+                    {
+                      'IdCliente': '1',
+                      'CpfCliente': '07772719906',
+                      'NomeCliente': 'Arthur',
+                      'StatusCliente': 'true',
+                    },
+                    {
+                      'IdCliente': '2',
+                      'CpfCliente': '53772719906',
+                      'NomeCliente': 'Renan',
+                      'StatusCliente': 'true',
+                    }
+                ]";
+
+            var dataTable = JsonConvert.DeserializeObject<DataTable>(jsonDataTable);
+
+            _repositoryConnection.Setup(x => x.CommandBusca("BuscaTodosClientes", It.IsAny<Dictionary<string, string>>())).Returns(dataTable);
 
             //Action
             var repo = new ClienteRepositorio(_enderecoClienteRepositorio.Object, _configurationMock.Object, _repositoryConnection.Object);
@@ -46,21 +57,65 @@ namespace AcademiaTest
 
             //Assert
             Assert.IsNotNull(result);
-
         }
 
         [TestMethod]
-        public void BuscaTodosClientesTeste_Null()
+        public void BuscarClientePorCpfTest_OK()
         {
             //Arrange
+            var jsonDataTable = @"[
+                    {
+                      'IdCliente': '1',
+                      'CpfCliente': '07772719906',
+                      'NomeCliente': 'Arthur',
+                      'StatusCliente': 'true',
+                    }
+                ]";
+            var dataTable = JsonConvert.DeserializeObject<DataTable>(jsonDataTable);
+            var cpfCliente = "07772719906";
+
+            _repositoryConnection.Setup(x => x.CommandBusca("BuscaClientePorCpf", It.IsAny<Dictionary<string, string>>())).Returns(dataTable);
 
             //Action
             var repo = new ClienteRepositorio(_enderecoClienteRepositorio.Object, _configurationMock.Object, _repositoryConnection.Object);
-            var result = repo.BuscarTodosClientes();
+            var result = repo.BuscarClientePorCpf(cpfCliente);
+
+            //Assert
+            Assert.IsNotNull(result);
+        }
+
+        [TestMethod]
+        public void BuscarClientePorCpfTest_Null()
+        {
+            //Arrange
+            var dataTable = new DataTable();
+            var cpfCliente = "07772719906";
+
+            _repositoryConnection.Setup(x => x.CommandBusca("BuscaClientePorCpf", It.IsAny<Dictionary<string, string>>())).Returns(dataTable);
+
+            //Action
+            var repo = new ClienteRepositorio(_enderecoClienteRepositorio.Object, _configurationMock.Object, _repositoryConnection.Object);
+            var result = repo.BuscarClientePorCpf(cpfCliente);
 
             //Assert
             Assert.IsNull(result);
-
         }
+
+        [TestMethod]
+        [ExpectedException(typeof(NullReferenceException))]
+        public void BuscarClientePorCpfTest_NullReferenceException()
+        {
+            //Arrange
+            var cpfCliente = "07772719906";
+
+            //Action
+            var repo = new ClienteRepositorio(_enderecoClienteRepositorio.Object, _configurationMock.Object, _repositoryConnection.Object);
+            var result = repo.BuscarClientePorCpf(cpfCliente);
+
+            //Assert
+            Assert.IsNotNull(result);
+        }
+
+
     }
 }
